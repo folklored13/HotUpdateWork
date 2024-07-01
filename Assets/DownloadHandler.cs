@@ -100,6 +100,13 @@ public class DownloadHandler : DownloadHandlerScript
         get { return totalLength; }
     }
 
+    /// <summary>
+    /// 用于处理文件下载的自定义类
+    /// </summary>
+    /// <param name="savePath">下载文件的保存路径</param>
+    /// <param name="onCompeted"></param>
+    /// <param name="onProgree"></param>
+    /// <param name="onError"></param>
     public DownloadHandler(string savePath,CompleteEventHandler onCompeted,ProgressEventHandler onProgree,ErrorEventHandler onError)
     {
         //在构造函数中，this关键字代表这次构造，过程中声明的对用类型的实例
@@ -199,8 +206,6 @@ public class DownloadHandler : DownloadHandlerScript
         base.Dispose();
         FileStreamClose();
     }
-
-
 
     /// <summary>
     /// 关闭文件流

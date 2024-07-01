@@ -6,8 +6,6 @@ using UnityEngine;
 //¥∞ø⁄‰÷»æ
 public class AssetManagerEditorWindow : EditorWindow
 {
-
-
     public string VersionString;
 
     public AssetManagerEditorWindowConfigSO WindowConfig;

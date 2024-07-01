@@ -69,7 +69,6 @@ public class AssetBundleNode
 
 }
 
-
 /// <summary>
 /// 所有在Editor目录下的C#脚本都不会跟着资源打包到可执行文件包体中
 /// </summary>
@@ -94,13 +93,11 @@ public class AssetManagerEditor
     /// 通过MenuItem特性，声明Editor顶部菜单栏选项
     /// </summary>
     [MenuItem(nameof(AssetManagerEditor) + "/" + nameof(BuildAssetBundle))]
+
+    //执行资源包的构建过程
     static void BuildAssetBundle()
     {
-        CheckBuildOutputPath();
-        //PathCombine方法可以在几个字符串之间插入斜杠
-        //string outputPath = "E:/AssetBundles/testAB1";
-        //string outputPath = "E:/AssetBundles/testAB2";
-        //string outputPath = "E:/AssetBundles/testAB3";
+        CheckBuildOutputPath();//确保构建输出路径存在且正确
 
         if (!Directory.Exists(AssetBundleOutputPath))
         {
@@ -118,10 +115,19 @@ public class AssetManagerEditor
         Debug.Log("AB包打包已完成");
     }
 
+    /// <summary>
+    /// 添加一个新的PackageEditorInfo实例
+    ///允许我们在编辑器中创建新的资源包配置
+    /// </summary>
     public static void AddPackageInfoEditor()
     {
         AssetManagerConfig.packageEditorInfos.Add(new PackageEditorInfo());
     }
+
+    /// <summary>
+    /// 从AssetManagerConfig.packageEditorInfos集合中移除指定的PackageEditorInfo实例
+    /// </summary>
+    /// <param name="info"></param>
     public static void RemovePackageInfoEditor(PackageEditorInfo info)
     {
         if(AssetManagerConfig.packageEditorInfos.Contains(info))
@@ -129,11 +135,21 @@ public class AssetManagerEditor
             AssetManagerConfig.packageEditorInfos.Remove(info);
         }
     }
+
+    /// <summary>
+    /// 向指定PackageEditorInfo实例的AssetList中添加一个新元素
+    /// </summary>
+    /// <param name="info"></param>
     public static void AddAsset(PackageEditorInfo info)
     {
         info.AssetList.Add(null);
     }
 
+    /// <summary>
+    /// 从指定PackageEditorInfo实例的AssetList中移除指定资源对象
+    /// </summary>
+    /// <param name="info"></param>
+    /// <param name="asset"></param>
     public static void RemoveAsset(PackageEditorInfo info,UnityEngine.Object asset)
     {
         if(info.AssetList.Contains(asset))
@@ -141,6 +157,10 @@ public class AssetManagerEditor
             info.AssetList.Remove(asset);
         }
     }
+    /// <summary>
+    /// 从指定路径加载 AssetManagerConfigScriptableObject 配置
+    /// </summary>
+    /// <param name="window"></param>
     public static void LoadConfig(AssetManagerEditorWindow window)
     {
         if (AssetManagerConfig == null)
@@ -151,9 +171,14 @@ public class AssetManagerEditor
             {
                 window.VersionString = window.VersionString.Insert(i, ".");
             }
-            
         }
     }
+
+    /// <summary>
+    /// 加载编辑器窗口配置AssetManagerEditorWindowConfigSO
+    ///设置窗口配置的样式和加载图片资源
+    /// </summary>
+    /// <param name="window"></param>
     public static void LoadWindowConfig(AssetManagerEditorWindow window)
     {
         if (window.WindowConfig == null)
@@ -175,19 +200,24 @@ public class AssetManagerEditor
             window.WindowConfig.LogoTextureStyle = new GUIStyle();
             window.WindowConfig.LogoTextureStyle.alignment = TextAnchor.MiddleCenter;
         }
-
     }
 
+    /// <summary>
+    /// 从JSON文件中加载配置
+    /// </summary>
     public static void LoadCongifFromJson()
     {
         string configPath = Path.Combine(Application.dataPath, "Editor/AssetManagerConfig.amc");
 
         string configString = File.ReadAllText(configPath);
 
-        JsonUtility.FromJsonOverwrite(configString, AssetManagerConfig);
-
+        JsonUtility.FromJsonOverwrite(configString, AssetManagerConfig);//将JSON字符串反序列化到AssetManagerConfig对象
 
     }
+
+    /// <summary>
+    /// 将资源管理配置以 JSON 格式存储到磁盘上
+    /// </summary>
     public static void SaveConfigToJson()
     {
         if (AssetManagerConfig != null)
@@ -195,7 +225,6 @@ public class AssetManagerEditor
             string configString = JsonUtility.ToJson(AssetManagerConfig);
             string outPath = Path.Combine(Application.dataPath, "Editor/AssetManagerConfig.amc");
             File.WriteAllText(outPath, configString);
-
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -258,6 +287,9 @@ public class AssetManagerEditor
         return assetBundleHashs;
     }
 
+    /// <summary>
+    /// 有向图法打包
+    /// </summary>
     public static void BuildAssetBundleFromDirectedGraph()
     {
         CheckBuildOutputPath();
@@ -448,7 +480,7 @@ public class AssetManagerEditor
 
     public static string PackageTableName = "AllPackages";
     /// <summary>
-    /// 
+    /// 用于构建、复制和创建热更新流程中所需的资源包和相关信息文件
     /// </summary>
     /// <param name="packages">Package字典，key为包名</param>
     /// <param name="outputPath"></param>
@@ -472,6 +504,11 @@ public class AssetManagerEditor
             File.WriteAllText(packageVertionPath, packageJSON);
         }
     }
+
+    /// <summary>
+    /// 从资源包输出路径读取所有资源包的名称
+    /// </summary>
+    /// <param name="versionPath"></param>
     static void CopyAssetBundleToVersionFolder(string versionPath)
     {
         //从AssetBundle输出路径下读取包列表
@@ -504,6 +541,10 @@ public class AssetManagerEditor
         }
     }
 
+    /// <summary>
+    /// 包含当前构建版本和文件信息
+    /// </summary>
+    /// <param name="versionPath"></param>
     public static void CreateBuildInfo(string versionPath)
     {
         BuildInfo currentBuildInfo= new BuildInfo();
@@ -525,9 +566,12 @@ public class AssetManagerEditor
         string buildInfoString = JsonConvert.SerializeObject(currentBuildInfo);
 
         File.WriteAllText(buildInfoSavePath, buildInfoString);
-
-
     }
+
+    /// <summary>
+    /// 确定增量构建模式
+    /// </summary>
+    /// <returns></returns>
     static BuildAssetBundleOptions CheckIncrementalBuildMode()
     {
         BuildAssetBundleOptions option = BuildAssetBundleOptions.None;
@@ -546,6 +590,11 @@ public class AssetManagerEditor
         return option;
     }
 
+    /// <summary>
+    /// 指定的输出路径读取 AssetBundleHashs 文件，包含了资源包的哈希表
+    /// </summary>
+    /// <param name="outputPath"></param>
+    /// <returns></returns>
     static string[] ReadAssetBundleHashTable(string outputPath)
     {
         string VersionHashTablePath = Path.Combine(outputPath, "AssetBundleHashs");
@@ -558,7 +607,7 @@ public class AssetManagerEditor
     }
 
     /// <summary>
-    /// 
+    /// 传递包名和资源索引信息，确保依赖关系中的包名和索引正确关联
     /// </summary>
     /// <param name="lastNode"></param>调用该函数的Node，本次创建的所有Node都为该Node的OutEdge
     /// <param name="allNode"></param>当前所有的Node，可以用成员变量代替
@@ -624,7 +673,6 @@ public class AssetManagerEditor
                 }
             }
 
-
             //如果lastNode是SourceAsset,则直接为当前Node添加last Node的Index
             //因为List是一个引用类型，所以SourceAsset的Sourceindeies哪怕内容和derived一样，也视为一个新的List
             if (lastNode.SourceIndex >= 0)
@@ -652,7 +700,10 @@ public class AssetManagerEditor
         }
     }
 
-
+    /// <summary>
+    /// 获取选定资源的依赖列表
+    /// </summary>
+    /// <returns></returns>
     public static List<string> GetSeletedAssetsDependencies()
     {
         List<string> depensencies = new List<string>();
@@ -669,6 +720,10 @@ public class AssetManagerEditor
         return depensencies;
     }
 
+    /// <summary>
+    /// 压缩模式
+    /// </summary>
+    /// <returns></returns>
     static BuildAssetBundleOptions CheckCompressionPattern()
     {
         BuildAssetBundleOptions option = new BuildAssetBundleOptions();
@@ -699,13 +754,14 @@ public class AssetManagerEditor
         //    (AssetManagerEditorWindow), true, nameof(AssetManagerEditor));
         //如果不赋予名称就可以作为Unity窗口随意放置在面板中
         AssetManagerEditorWindow window = (AssetManagerEditorWindow)EditorWindow.GetWindow(typeof(AssetManagerEditorWindow));
-
     }
 
     public static string OutputBundleName= "LocalAssets";
+    /// <summary>
+    /// 确定资源打包的输出路径
+    /// </summary>
     static void CheckBuildOutputPath()
     {
-
         switch (AssetManagerConfig.BuildingPattern)
         {
             case AssetBundlePattern.EditorSimulation: 
@@ -731,7 +787,6 @@ public class AssetManagerEditor
             //若路径不存在就创建路径
             Directory.CreateDirectory(AssetBundleOutputPath);
         }
-
     }
 
     /// <summary>
@@ -741,7 +796,6 @@ public class AssetManagerEditor
     /// <param name="setsA"></param>
     /// <param name="setsB"></param>
     /// <returns></returns>
-
     public static List<GUID> ContrastDepedenciesFromGUID(List<GUID> setsA, List<GUID> setsB)
     {
         List<GUID> newDependencies = new List<GUID>();
@@ -768,6 +822,7 @@ public class AssetManagerEditor
         //返回集合Snew
         return newDependencies;
     }
+
     public static void BuiAssetBundleFromSets()
     {
         CheckBuildOutputPath();
@@ -933,5 +988,4 @@ public class AssetManagerEditor
         }
         return assetPaths;
     }
-
 }

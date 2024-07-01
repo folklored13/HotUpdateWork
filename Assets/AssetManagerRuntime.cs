@@ -23,6 +23,9 @@ public enum AssetBundlePattern
     Remote
 }
 
+/// <summary>
+/// 压缩模式
+/// </summary>
 public enum AssetBundleCompressionPattern
 {
     LZMA,
@@ -45,6 +48,7 @@ public enum IncrementalBuildMode
 /// </summary>
 /// 
 
+//存储有关单个资源包的名称、资源列表、依赖关系和是否为初始包的信息
 public class PackageBuildInfo
 {
     public string PackageName;
@@ -55,7 +59,6 @@ public class PackageBuildInfo
     /// </summary>
     public bool IsSourcePackage = false;
 
-   
 }
 /// <summary>
 /// Package中的Asset打包之后记录的信息
@@ -72,18 +75,25 @@ public class AssetBuildInfo
     public string AssetBundleName;
 }
 
-
+/// <summary>
+/// 封装了资源包的加载逻辑
+/// </summary>
 public class AssetPackage
 {
     public PackageBuildInfo PackageInfo;
-    public string PackageName {get{ return PackageInfo.PackageName; } }
+    public string PackageName {get{ return PackageInfo.PackageName; } }//返回 PackageInfo 中的包名称
 
-    Dictionary<string, Object> LoadedAssets = new Dictionary<string, Object>();
+    Dictionary<string, Object> LoadedAssets = new Dictionary<string, Object>();//用于存储已经加载的资源，其中键是资源名称，值是资源对象。
 
-
+    /// <summary>
+    /// 用于加载指定名称的场景
+    /// </summary>
+    /// <param name="SceneName">场景名</param>
     public void LoadScene(string SceneName)
     {
-        bool isHasScene = false;
+        bool isHasScene = false;//是否找到了指定的场景
+
+        //检查每个 AssetBuildInfo 对象的 AssetName 是否与传入的 SceneName 匹配。
         foreach (AssetBuildInfo info in PackageInfo.AssetIfos)
         {
             if (info.AssetName == SceneName)
@@ -106,6 +116,8 @@ public class AssetPackage
             SceneManager.LoadScene(SceneName);
         }
     }
+
+    //定义了一个泛型方法 LoadAsset，用于加载指定名称的资源，并返回该资源
     public T LoadAsset<T>(string assetName) where T:Object
     {
         T assetObject = default;
@@ -142,6 +154,10 @@ public class AssetPackage
     
 }
 
+/// <summary>
+/// 定义了一个名为 BuildInfo的类
+/// 作用是存储有关构建版本的信息，包括文件名及其哈希值、总文件大小
+/// </summary>
 public class BuildInfo
 {
     public int BuildVersion;
@@ -196,8 +212,12 @@ public class AssetManagerRuntime
     Dictionary<string,AssetPackage> LoadedAssetPackages = new Dictionary<string, AssetPackage>();
 
 
-    public AssetBundleManifest Mainfest;
+    public AssetBundleManifest Mainfest; //用于存储资源包的清单信息
 
+    /// <summary>
+    /// 初始化资源管理器实例，并设置资源加载模式
+    /// </summary>
+    /// <param name="pattern">加载模式</param>
     public static void AssetManagerInit(AssetBundlePattern pattern)
     {
         if(Instance==null)
@@ -210,6 +230,9 @@ public class AssetManagerRuntime
         }
     }
 
+    /// <summary>
+    /// 根据不同的资源加载模式设置本地资源路径和下载路径
+    /// </summary>
     void CheckLoadAssetPath()
     {
         switch(CurrentPattern)
@@ -226,6 +249,9 @@ public class AssetManagerRuntime
         }
     }
 
+    /// <summary>
+    /// 检查本地资源版本，并在本地版本文件不存在时创建它
+    /// </summary>
     void CheckLocalAssetVersion()
     {
         //asset.version是由我们自定义拓展名的文本文件
@@ -254,10 +280,17 @@ public class AssetManagerRuntime
         }
     }
 
+    /// <summary>
+    /// 设置资源包加载路径
+    /// </summary>
     void CheckAssetBundleLoadPath()
     {
         AssetBundleLoadPath = Path.Combine(LocalAssetPath, LocalAssetVersion.ToString());
     }
+
+    /// <summary>
+    /// 用于更新本地资源版本号，并更新本地版本文件
+    /// </summary>
     public void UpdataLocalAssetVersion()
     {
         LocalAssetVersion = RemoteAssetVersion;
@@ -267,6 +300,11 @@ public class AssetManagerRuntime
         Debug.Log($"本地版本更新完成{LocalAssetVersion}");
     }
 
+    /// <summary>
+    /// 用于加载指定名称的资源包
+    /// </summary>
+    /// <param name="packageName"></param>
+    /// <returns></returns>
     public AssetPackage LoadPackage(string packageName)
     {
         string packagePath = null;

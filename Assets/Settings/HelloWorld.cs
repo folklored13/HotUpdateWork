@@ -9,6 +9,9 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+/// <summary>
+/// 用于存储资源包版本差异的结果
+/// </summary>
 public class AssetBundleVersionDifference
 {
     /// <summary>
@@ -28,23 +31,23 @@ public class AssetBundleVersionDifference
 public class HelloWorld : MonoBehaviour
 {
 
-    public AssetBundlePattern LoadPattern;
+    public AssetBundlePattern LoadPattern;//声明加载模式
 
-    public Button button;
+    public Button button;//点击进入场景按钮
 
-    public string HTTPAddress = "http://192.168.203.48:808/";
+    public string HTTPAddress = "http://192.168.203.48:808/";//服务器地址
 
-    string RemoteVersionPath;
+    string RemoteVersionPath;//远端版本地址
 
-    string DownloadVersionPath;
+    string DownloadVersionPath;//下载版本地址
 
-    public Text progressTxt;
+    public Text progressTxt;//下载进度文本
 
-    public Text versionTxt;
+    public Text versionTxt;//版本号文本
 
-    public Text displayText;
+    public Text displayText;//展示是否存在
 
-    public Text tipTxt;
+    public Text tipTxt;//提示
 
 
 
@@ -61,15 +64,16 @@ public class HelloWorld : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// 加载场景
+    /// </summary>
     void LoadAsset()
     {
-
         AssetPackage assetPackage = AssetManagerRuntime.Instance.LoadPackage("A");
 
         Debug.Log(assetPackage.PackageName);
 
         assetPackage.LoadScene("Assets/Scenes/SchoolSceneDay.unity");
-
     }
 
 
@@ -80,6 +84,12 @@ public class HelloWorld : MonoBehaviour
     string DownloadInfoFileName = "TempDownloadInfo";
 
     List<string> downloadMessages = new List<string>();
+
+    /// <summary>
+    /// 用于显示下载完成后的文件存在提示
+    /// </summary>
+    /// <param name="fileName"></param>
+    /// <param name="message"></param>
     void OnCompleted(string fileName, string message)
     {
 
@@ -115,18 +125,31 @@ public class HelloWorld : MonoBehaviour
         }
 
     }
-
+    /// <summary>
+    /// 用于显示下载进度
+    /// </summary>
+    /// <param name="progress">进度值</param>
+    /// <param name="currentLength">当前已下载长度</param>
+    /// <param name="totalLength">文件总长度</param>
     void OnProgress(float progress, long currentLength, long totalLength)
     {
         progressTxt.text = $"下载进度：{progress * 100}%,当前下载长度{currentLength * 1.0f / 1024 / 1024}M，文件总长度：{totalLength * 1.0f / 1024 / 1024}M";
         Debug.Log($"下载进度：{progress * 100}%,当前下载长度{currentLength * 1.0f / 1024 / 1024}M，文件总长度：{totalLength * 1.0f / 1024 / 1024}M");
     }
 
+    /// <summary>
+    /// 用于打印错误信息
+    /// </summary>
+    /// <param name="errorCode"></param>
+    /// <param name="message"></param>
     void OnError(ErrorCode errorCode, string message)
     {
         Debug.LogError(message);
     }
 
+    /// <summary>
+    /// 创建一个AssetBundle的下载列表，并根据这个列表来下载需要更新的资源包
+    /// </summary>
     void CreateAssetBundleDownloadList()
     {
         //本地表读取路径
@@ -189,18 +212,19 @@ public class HelloWorld : MonoBehaviour
             }
             else
             {
-
                 OnCompleted(fileName, "本地已存在");
             }
         }
-
-
     }
+
+    /// <summary>
+    /// 生成一个下载列表，并根据这个列表下载所需的资源包
+    /// </summary>
     void CreatePackagesDownloadList()
     {
-        string allPackagesPath = Path.Combine(DownloadVersionPath, "AllPackages");
-        string allPackagesString = File.ReadAllText(allPackagesPath);
-        List<string> allPackages = JsonConvert.DeserializeObject<List<string>>(allPackagesString);
+        string allPackagesPath = Path.Combine(DownloadVersionPath, "AllPackages");//存储了包含所有包名的文件路径
+        string allPackagesString = File.ReadAllText(allPackagesPath);//allPackagesPath 路径的文件中读取所有包名的字符串
+        List<string> allPackages = JsonConvert.DeserializeObject<List<string>>(allPackagesString);//存储反序列化后的包名
 
         Downloader downloader = null;
 
@@ -208,14 +232,13 @@ public class HelloWorld : MonoBehaviour
         {
             if (!CurrentDownloadInfo.DownloadFileName.Contains(packageName))
             {
-                string remoteFilePath = Path.Combine(RemoteVersionPath, packageName);
-                string remotePackageSavePath = Path.Combine(DownloadVersionPath, packageName);
+                string remoteFilePath = Path.Combine(RemoteVersionPath, packageName);//远程文件路径 
+                string remotePackageSavePath = Path.Combine(DownloadVersionPath, packageName);//本地保存路径
                 downloader = new Downloader(remoteFilePath, remotePackageSavePath, OnCompleted, OnProgress, OnError);
                 downloader.StartDownload();
             }
             else
             {
-
                 OnCompleted(packageName, "本地已经存在");
             }
         }
@@ -229,19 +252,24 @@ public class HelloWorld : MonoBehaviour
         }
         else
         {
-
             OnCompleted("AssetBundleHashs", "本地已经存在");
         }
     }
-    BuildInfo RemoteBuildInfo;
+
+    BuildInfo RemoteBuildInfo;//存储从远程服务器获取的构建信息
+
+    /// <summary>
+    /// 获取远程服务器上的版本信息，比较本地版本和远程版本，决定是否需要进行更新
+    /// </summary>
+    /// <returns></returns>
     IEnumerator GetRemoteVersion()
     {
         #region 获取远端版本号
-        string remoteVersionFilePath = Path.Combine(HTTPAddress, "BuildOutput", "BuildVersion.version");
+        string remoteVersionFilePath = Path.Combine(HTTPAddress, "BuildOutput", "BuildVersion.version");//存储了远程版本文件的路径
 
-        UnityWebRequest request = UnityWebRequest.Get(remoteVersionFilePath);
+        UnityWebRequest request = UnityWebRequest.Get(remoteVersionFilePath);//发起一个GET请求到远程版本文件的URL
 
-        request.SendWebRequest();
+        request.SendWebRequest();//发送网络请求
 
         while (!request.isDone)
         {
@@ -254,6 +282,7 @@ public class HelloWorld : MonoBehaviour
             yield break;
         }
 
+        //如果请求成功，解析返回的文本为整型版本号
         int version = int.Parse(request.downloadHandler.text);
         if (AssetManagerRuntime.Instance.LocalAssetVersion == version)
         {
@@ -261,17 +290,16 @@ public class HelloWorld : MonoBehaviour
             tipTxt.text = "版本一样不用进行下载";
             if (button)
             {
-
                 //LoadAsset();
             }
-
             yield break;
         }
+
         //使用变量保存远端版本
         AssetManagerRuntime.Instance.RemoteAssetVersion = version;
         #endregion
-        RemoteVersionPath = Path.Combine(HTTPAddress, "BuildOutput", AssetManagerRuntime.Instance.RemoteAssetVersion.ToString());
-        DownloadVersionPath = Path.Combine(AssetManagerRuntime.Instance.DownloadPath, AssetManagerRuntime.Instance.RemoteAssetVersion.ToString());
+        RemoteVersionPath = Path.Combine(HTTPAddress, "BuildOutput", AssetManagerRuntime.Instance.RemoteAssetVersion.ToString());//远程路径
+        DownloadVersionPath = Path.Combine(AssetManagerRuntime.Instance.DownloadPath, AssetManagerRuntime.Instance.RemoteAssetVersion.ToString());//本地下载路径
 
         if (!Directory.Exists(DownloadVersionPath))
         {
@@ -284,7 +312,7 @@ public class HelloWorld : MonoBehaviour
 
         #region 获取远端BuildInfo
 
-        string remoteBuildInfoPath = Path.Combine(HTTPAddress, "BuildOutput", version.ToString(), "BuildInfo");
+        string remoteBuildInfoPath = Path.Combine(HTTPAddress, "BuildOutput", version.ToString(), "BuildInfo");//远端BuildInfo路径
 
         request = UnityWebRequest.Get(remoteBuildInfoPath);
 
@@ -302,7 +330,7 @@ public class HelloWorld : MonoBehaviour
         }
 
         string buildInfoString = request.downloadHandler.text;
-        RemoteBuildInfo = JsonConvert.DeserializeObject<BuildInfo>(buildInfoString);
+        RemoteBuildInfo = JsonConvert.DeserializeObject<BuildInfo>(buildInfoString);//将返回的文本反序列化为 BuildInfo 对象
 
         if (RemoteBuildInfo == null || RemoteBuildInfo.FileTotalSize <= 0)
         {
@@ -310,14 +338,16 @@ public class HelloWorld : MonoBehaviour
         }
         #endregion
         CreateDownloadList();
-
-
     }
 
-
+    /// <summary>
+    /// 作用是初始化下载列表，并根据这个列表开始下载必要的文件
+    /// </summary>
     void CreateDownloadList()
     {
         //首先读取本地下载列表
+
+        //本地下载信息文件的路径，这个文件存储了之前下载的文件信息
         string downoadInfoPath = Path.Combine(AssetManagerRuntime.Instance.DownloadPath, DownloadInfoFileName);
         if (File.Exists(downoadInfoPath))
         {
@@ -340,26 +370,38 @@ public class HelloWorld : MonoBehaviour
         {
             string filePath = Path.Combine(RemoteVersionPath, "AllPackages");
             string savePath = Path.Combine(DownloadVersionPath, "AllPackages");
-            Downloader downloader = new Downloader(filePath, savePath, OnCompleted, OnProgress, OnError);
+            Downloader downloader = new Downloader(filePath, savePath, OnCompleted, OnProgress, OnError);//创建 Downloader 类的实例，设置下载完成、下载进度和错误处理的回调函数
             downloader.StartDownload();
         }
 
     }
 
+    /// <summary>
+    /// 将下载的资源从临时下载路径复制到本地资源路径，并清理下载信息文件
+    /// </summary>
     void CopyDownloadAssetsToLocalPath()
     {
-        DirectoryInfo directoryInfo = new DirectoryInfo(DownloadVersionPath);
+        DirectoryInfo directoryInfo = new DirectoryInfo(DownloadVersionPath);//表示下载资源所在的目录
 
-        string localVersionPath = Path.Combine(AssetManagerRuntime.Instance.LocalAssetPath, AssetManagerRuntime.Instance.RemoteAssetVersion.ToString());
+        string localVersionPath = Path.Combine(AssetManagerRuntime.Instance.LocalAssetPath, AssetManagerRuntime.Instance.RemoteAssetVersion.ToString());//存储更新后的资源
 
         directoryInfo.MoveTo(localVersionPath);
 
-        string downoadInfoPath = Path.Combine(AssetManagerRuntime.Instance.DownloadPath, DownloadInfoFileName);
-        File.Delete(downoadInfoPath);
+        string downoadInfoPath = Path.Combine(AssetManagerRuntime.Instance.DownloadPath, DownloadInfoFileName);//记录了下载过程中的文件名信息
+        File.Delete(downoadInfoPath);//删除下载信息文件
     }
+
+    /// <summary>
+    /// 识别出哪些资源包在新版本中被添加或删除了
+    /// </summary>
+    /// <param name="oldVersionAssets">旧版本的资源包名称数组</param>
+    /// <param name="newVersionAssets">新版本的资源包名称数组</param>
+    /// <returns></returns>
     AssetBundleVersionDifference ContrastAssetBundleVersion(string[] oldVersionAssets, string[] newVersionAssets)
     {
-        AssetBundleVersionDifference difference = new AssetBundleVersionDifference();
+        AssetBundleVersionDifference difference = new AssetBundleVersionDifference();//创建实例difference，用于存储比较结果
+
+        //遍历旧版本的资源包列表
         foreach (var assetName in oldVersionAssets)
         {
             if (newVersionAssets.Contains(assetName))
@@ -367,7 +409,7 @@ public class HelloWorld : MonoBehaviour
                 difference.ReducedAssetBundles.Add(assetName);
             }
         }
-
+        //循环遍历新版本的资源包列表
         foreach (var assetName in newVersionAssets)
         {
             if (!oldVersionAssets.Contains(assetName))

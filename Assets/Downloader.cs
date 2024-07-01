@@ -12,6 +12,9 @@ public class DownloadInfo
     public List<string> DownloadFileName = new List<string>();
 }
 
+/// <summary>
+/// 由我们自己定义的下载处理类
+/// </summary>
 public class Downloader : MonoBehaviour
 {
     /// <summary>
@@ -58,7 +61,9 @@ public class Downloader : MonoBehaviour
         this.OnError = onError;
     }
 
-
+    /// <summary>
+    /// 启动文件下载任务
+    /// </summary>
     public void StartDownload()
     {
         request = UnityWebRequest.Get(URL);
