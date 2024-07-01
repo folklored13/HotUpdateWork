@@ -1,0 +1,10 @@
+<<<<<<< HEAD
+﻿{
+=======
+{
+>>>>>>> e1c450d (合并项目)
+  "version": "1.0",
+  "components": [
+    "Microsoft.VisualStudio.Workload.ManagedGame"
+  ]
+}

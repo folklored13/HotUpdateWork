@@ -1,0 +1,27 @@
+ManifestFileVersion: 0
+CRC: 2374507767
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 61d5aa5e11cb6d659bab18f5e2afd67e
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c21d61fe394c58399df3c6fb5c7c99b3
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: 61d5aa5e11cb6d659bab18f5e2afd67e
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Images/Arissa.png
+- Assets/Images/Leave.png
+- Assets/Images/Erika.png
+- Assets/Images/Aj.png
+- Assets/Images/Ely.png
+- Assets/Images/1.jpg
+Dependencies: []
