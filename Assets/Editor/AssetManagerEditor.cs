@@ -48,7 +48,6 @@ public class AssetBundleNode
     /// </summary>
     public List<int> SourceIndeices = new List<int>();
 
-
     /// <summary>
     /// 只有sourceAsset才具有包名
     /// </summary>
@@ -447,9 +446,7 @@ public class AssetManagerEditor
                 assetBuildInfo.AssetBundleName = assetBundleBuilds[buildIndex].assetBundleName;
 
                 packageInfoDic[node.PackageName].AssetIfos.Add(assetBuildInfo);
-
             }
-           
             buildIndex++;
         }
 
@@ -475,7 +472,6 @@ public class AssetManagerEditor
 
         CreateBuildInfo(versionPath);
         AssetDatabase.Refresh();
-
     }
 
     public static string PackageTableName = "AllPackages";
@@ -527,7 +523,6 @@ public class AssetManagerEditor
         //string packageInfoPath = Path.Combine(outputPath, PackageTableName);
         //string packageInfoVersionPath = Path.Combine(assetBundleVersionPath, PackageTableName);
         //File.Copy(packageInfoPath, packageInfoVersionPath, true);
-
 
         foreach (var assetName in assetNames)
         {

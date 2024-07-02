@@ -49,8 +49,6 @@ public class HelloWorld : MonoBehaviour
 
     public Text tipTxt;//ÌבÊ¾
 
-
-
     void Start()
     {
         button.onClick.AddListener(LoadAsset);
@@ -417,10 +415,8 @@ public class HelloWorld : MonoBehaviour
                 difference.AdditionAssetBundles.Add(assetName);
             }
         }
-
         return difference;
     }
-
 }
 
 

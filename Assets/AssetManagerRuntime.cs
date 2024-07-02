@@ -191,7 +191,6 @@ public class AssetManagerRuntime
     /// </summary>
     public string DownloadPath;
 
-
     /// <summary>
     /// 用于对比本地资源版本的远端资源版本号
     /// </summary>
@@ -307,21 +306,21 @@ public class AssetManagerRuntime
     /// <returns></returns>
     public AssetPackage LoadPackage(string packageName)
     {
-        string packagePath = null;
-        string packageString = null;
+        string packagePath = null;//资源包路径
+        string packageString = null;//资源包内容
         if (PackageNames == null)
         {
             packagePath = Path.Combine(AssetBundleLoadPath, "AllPackages");
             packageString = File.ReadAllText(packagePath);
             PackageNames = JsonConvert.DeserializeObject<List<string>>(packageString);
         }
-
-        if(!PackageNames.Contains(packageName))
+        //检查包是否存在
+        if (!PackageNames.Contains(packageName))
         {
             Debug.LogError($"{packageName}本地包列表中不存在该包");
             return null;
         }
-
+        //加载资源包清单
         if(Mainfest==null)
         {
             string mainBundlePath = Path.Combine(AssetBundleLoadPath, "LocalAssets");
@@ -330,6 +329,7 @@ public class AssetManagerRuntime
         }
 
         AssetPackage assetPackage=null;
+        //检查是否已经加载
         if(LoadedAssetPackages.ContainsKey(packageName))
         {
             assetPackage = LoadedAssetPackages[packageName];
@@ -338,18 +338,17 @@ public class AssetManagerRuntime
         }
         assetPackage = new AssetPackage();
 
-        packagePath= Path.Combine(AssetBundleLoadPath, packageName);
+        //加载包信息
+        packagePath = Path.Combine(AssetBundleLoadPath, packageName);
         packageString = File.ReadAllText(packagePath);
         assetPackage.PackageInfo = JsonConvert.DeserializeObject<PackageBuildInfo>(packageString);
 
         LoadedAssetPackages.Add(assetPackage.PackageName, assetPackage);
-
+        //加载依赖包
         foreach(string dependName in assetPackage.PackageInfo.PackageDependecies)
         {
             LoadPackage(dependName);
         }
         return assetPackage;
     }
-
-
 }
